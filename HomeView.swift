@@ -13,9 +13,6 @@ struct HomeView: View {
     @State private var showToneSheet: Bool = false
     @State private var toneIconBounce: Bool = false
 
-    // attachments button
-    @State private var showAttachmentOptions: Bool = false
-
     // save menu
     @State private var saveIconBounce: Bool = false
     @State private var lastSaveAction: SaveAction?
@@ -237,7 +234,6 @@ struct HomeView: View {
                             .symbolVariant(.fill)
                             .symbolRenderingMode(.hierarchical)
                             .frame(width: 32, height: 32)
-                            .glassEffect()
                             .glassEffectID("saveGlass", in: glassNamespace)
                             .opacity(summaryViewModel.summary == nil ? 0.35 : 1.0)
                     }
@@ -351,41 +347,29 @@ struct HomeView: View {
             // When keyboard is shown => hide buttons so bar can stretch
             if !isInputFocused {
 
-                // ATTACHMENT – Liquid glass MENU with two actions
+                // ATTACHMENT – Liquid glass menu, same size as summarize button
                 Menu {
                     Button {
-                        // TODO: Scan with camera
                         Haptics.impact(.light)
                     } label: {
                         Label("Scan with camera", systemImage: "camera.viewfinder")
                     }
 
                     Button {
-                        // TODO: Import from Files
                         Haptics.impact(.light)
                     } label: {
                         Label("Import from files", systemImage: "doc.richtext")
                     }
                 } label: {
-                    ZStack {
-                        Circle()
-                            .fill(.ultraThinMaterial)
-                            .overlay(
-                                Circle()
-                                    .strokeBorder(Color.white.opacity(0.18),
-                                                  lineWidth: 0.5)
-                            )
-                            .frame(width: 50, height: 50)
-                            .glassEffect()
-                            .glassEffectID("attachmentGlass", in: glassNamespace)
-
-                        Image(systemName: "paperclip")
-                            .font(.system(size: 17, weight: .semibold))
-                            .foregroundStyle(.primary)
-                            .frame(width: 36, height: 36)
-                    }
+                    Image(systemName: "paperclip")
+                        .font(.system(size: 18, weight: .semibold))
+                        .frame(width: 35, height: 35)            // ⬅️ MATCH summarize button
+//                        .glassEffect()
+                        .glassEffectID("attachmentGlass", in: glassNamespace)
                 }
-                .tint(.white)
+                .buttonStyle(.glassProminent)       // ⬅️ SAME STYLE
+                .buttonBorderShape(.circle)         // ⬅️ SAME SHAPE
+                .tint(currentTint)
                 .accessibilityLabel("Add content from camera or files")
                 .accessibilityHint("Attach text using the camera or file picker.")
 
@@ -400,8 +384,8 @@ struct HomeView: View {
                             Image(systemName: "sparkles")
                         }
                     }
-                    .font(.system(size: 17, weight: .semibold))
-                    .frame(width: 33, height: 33)
+                    .font(.system(size: 18, weight: .semibold))
+                    .frame(width: 35, height: 35)
                     .rotationEffect(.degrees(loadingRotation))
                 }
                 .buttonStyle(.glassProminent)
@@ -412,7 +396,7 @@ struct HomeView: View {
                 .accessibilityHint("Generate a summary of the current text.")
             }
         }
-        .padding(.horizontal, 1)
+        .padding(.horizontal, 5)
         .animation(.easeInOut(duration: keyboardAnimationDuration), value: isInputFocused)
         .animation(.easeInOut(duration: 0.18), value: inputText)
     }

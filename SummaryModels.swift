@@ -21,33 +21,52 @@ enum SummaryTone: String, CaseIterable, Identifiable {
         }
     }
 
-    /// Instruction you pass to the FM.
+    /// Instruction you pass to the FM for this tone.
+    ///
+    /// These are designed so:
+    /// - Scientific keeps mechanisms, methods, abbreviations, limitations.
+    /// - Balanced keeps seriousness and structure but is readable.
+    /// - Concise is ultra-short but keeps all distinct ideas.
+    /// - Creative keeps emotional tone and narrative flavor.
+    /// - Bullet points is clean, one-idea-per-bullet structure.
     var systemInstruction: String {
         switch self {
         case .balanced:
             return """
-            Write a clear, natural summary with a neutral tone.
-            Keep all key points but avoid being too long or too short.
+            Write a clear, neutral summary that preserves all important facts \
+            and the seriousness of any risks, ethical dilemmas, or emotional stakes. \
+            Do not oversimplify. Keep the main structure of the original argument while \
+            making it easier to read.
             """
+
         case .scientific:
             return """
-            Write a precise, formal summary using scientific or academic language.
-            Emphasize definitions, data, and logical structure. Avoid jokes and slang.
+            Write a precise, formal summary using scientific or academic language. \
+            Preserve mechanistic details, key definitions, abbreviations, methods, \
+            biomarkers, and limitations. Highlight the main findings and any open questions. \
+            Avoid jokes, slang, or casual tone.
             """
+
         case .concise:
             return """
-            Write the shortest possible summary that still preserves the core meaning.
-            Avoid extra adjectives, examples, or side notes. Prioritize brevity.
+            Write the shortest possible summary that still preserves all distinct ideas \
+            and concerns. Remove examples, repetition, and minor details, but do not drop \
+            entire categories of meaning. Prioritize brevity over style.
             """
+
         case .creative:
             return """
-            Write an engaging, narrative-style summary with a friendly tone and light storytelling,
-            while keeping all important facts accurate.
+            Write an engaging, narrative-style summary that keeps the emotional tone \
+            and personality of the original text. You may lightly rephrase for flow, \
+            but keep all important facts accurate and do not invent new events or details.
             """
+
         case .bulletPoints:
             return """
-            Write the summary as a list of structured bullet points, grouped logically.
-            No long paragraphs. Each bullet should contain one key idea.
+            Write the summary as a list of structured bullet points. \
+            Each bullet should contain one key idea. \
+            Preserve important technical, ethical, or emotional nuances. \
+            Do not write long paragraphs.
             """
         }
     }
@@ -72,16 +91,19 @@ enum SaveAction: String, CaseIterable, Identifiable {
 
     var subtitle: String {
         switch self {
-        case .asFile:      return "Export a document you can share or store."
-        case .asPlainText: return "Copy the summary to the clipboard."
-        case .asMarkdown:  return "Keep headings, lists and formatting."
+        case .asFile:
+            return "Export a document you can share or store."
+        case .asPlainText:
+            return "Copy the summary to the clipboard."
+        case .asMarkdown:
+            return "Keep headings, lists and formatting."
         }
     }
 
     var systemImage: String {
         switch self {
         case .asFile:
-            // use a safe symbol that exists everywhere
+            // Safe SF Symbol that exists everywhere.
             return "square.and.arrow.down"
         case .asPlainText:
             return "doc.on.doc"

@@ -5,11 +5,16 @@ struct HomeView: View {
 
     // hero text breathing
     @State private var isPulsing: Bool = false
+    // extra bounce when summary finishes
+    @State private var blobScale: CGFloat = 1.0
 
     // text style
     @State private var selectedTone: SummaryTone = .balanced
     @State private var showToneSheet: Bool = false
     @State private var toneIconBounce: Bool = false
+
+    // attachments button
+    @State private var showAttachmentOptions: Bool = false
 
     // save menu
     @State private var saveIconBounce: Bool = false
@@ -109,6 +114,7 @@ struct HomeView: View {
                             .accessibilityLabel("Hero message: Your text stays yours.")
                     }
                     .frame(width: 260, height: 260)
+                    .scaleEffect(blobScale)
                     .onAppear {
                         withAnimation(
                             .easeInOut(duration: 2.4)
@@ -118,7 +124,7 @@ struct HomeView: View {
                         }
                     }
 
-                    // MARK: - Inline summary (if exists, and NOT editing)
+                    // MARK: - Inline summary (if exists & not editing)
                     if let summary = summaryViewModel.summary, !isInputFocused {
                         SummaryCardView(
                             summary: summary,
@@ -134,7 +140,11 @@ struct HomeView: View {
                         Spacer(minLength: 40)
                     }
 
-                    Spacer(minLength: 0)
+                    // MARK: - BOTTOM INPUT BAR + LIQUID GLASS BUTTONS
+                    bottomBar
+                        .padding(.horizontal, 14)
+                        // tiny safe gap above keyboard suggestions when focused
+                        .padding(.bottom, isInputFocused ? 6 : -10)
                 }
                 // Smooth insert/remove of the summary card
                 .animation(
@@ -142,7 +152,7 @@ struct HomeView: View {
                     value: summaryViewModel.summary != nil
                 )
                 .animation(
-                    .spring(response: 0.4, dampingFraction: 0.9),
+                    .spring(response: 0.5, dampingFraction: 0.9),
                     value: isInputFocused
                 )
 
@@ -181,13 +191,6 @@ struct HomeView: View {
                     .accessibilityLabel("Summary copied to clipboard")
                     .accessibilityAddTraits(.isStaticText)
                 }
-            }
-
-            // ⬇️ Bottom bar is now pinned to the bottom / keyboard
-            .safeAreaInset(edge: .bottom) {
-                bottomBar
-                    .padding(.horizontal, 14)
-                    .padding(.bottom, 4)
             }
 
             // MARK: - TOOLBAR (Liquid Glass layer)
@@ -274,9 +277,11 @@ struct HomeView: View {
                    message: {
                        Text(summaryViewModel.errorMessage ?? "Please try again.")
                    })
-            // 🔄 Spin hourglass when isLoading changes
+
+            // 🔄 Spin hourglass & bounce blob when loading finishes
             .onChange(of: summaryViewModel.isLoading) { _, isLoading in
                 if isLoading {
+                    // start spinning
                     loadingRotation = 0
                     withAnimation(
                         .linear(duration: 1.0)
@@ -285,7 +290,13 @@ struct HomeView: View {
                         loadingRotation = 360
                     }
                 } else {
+                    // stop spinning
                     loadingRotation = 0
+
+                    // bounce the blob if we have a summary
+                    if summaryViewModel.summary != nil {
+                        bounceBlob()
+                    }
                 }
             }
         }
@@ -437,6 +448,22 @@ struct HomeView: View {
                 Haptics.notify(.error)
                 showErrorAlert = true
             }
+        }
+    }
+
+    // MARK: - Blob bounce
+
+    private func bounceBlob() {
+        withAnimation(
+            .spring(response: 0.35, dampingFraction: 0.5)
+        ) {
+            blobScale = 1.08
+        }
+        withAnimation(
+            .spring(response: 0.55, dampingFraction: 0.9)
+                .delay(0.12)
+        ) {
+            blobScale = 1.0
         }
     }
 

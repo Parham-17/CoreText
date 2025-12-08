@@ -17,12 +17,12 @@ struct SummaryDetailView: View {
             ScrollView {
                 VStack(alignment: .leading, spacing: 16) {
 
-                    // Tone label
+                    // Tone info
                     Text(tone.displayName)
                         .font(.subheadline.weight(.medium))
                         .foregroundStyle(.secondary)
 
-                    // Actual summary text
+                    // The actual summary, large and comfy
                     Text(summary)
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .font(.body)
@@ -41,16 +41,12 @@ struct SummaryDetailView: View {
                     }
                 }
 
-                // Text-to-speech button
+                // Text-to-speech
                 ToolbarItem(placement: .topBarTrailing) {
                     Button {
                         showSpeechAlert = true
                     } label: {
-                        Image(
-                            systemName: speech.isSpeaking
-                            ? "speaker.wave.2.fill"
-                            : "speaker.wave.1"
-                        )
+                        Image(systemName: speech.isSpeaking ? "speaker.wave.2.fill" : "speaker.wave.1")
                     }
                     .accessibilityLabel(
                         speech.isSpeaking
@@ -59,18 +55,24 @@ struct SummaryDetailView: View {
                     )
                 }
             }
-        }
-        .alert("Read this summary aloud?",
-               isPresented: $showSpeechAlert) {
-            Button("Read aloud") {
-                speech.read(text: plainText)
+            .alert("Read this summary aloud?",
+                   isPresented: $showSpeechAlert) {
+
+                Button("Read aloud") {
+                    // 🔊 call without the `text:` label
+                    if speech.isSpeaking {
+                        speech.stop()
+                    }
+                    speech.read(plainText)
+                }
+
+                Button("Cancel", role: .cancel) { }
+            } message: {
+                Text("Audio can be heard by people nearby. Make sure you're comfortable before playing it out loud.")
             }
-            Button("Cancel", role: .cancel) { }
-        } message: {
-            Text("Audio can be heard by people nearby. Make sure you’re comfortable before playing it out loud.")
-        }
-        .onDisappear {
-            speech.stop()
+            .onDisappear {
+                speech.stop()
+            }
         }
     }
 }

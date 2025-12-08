@@ -1,18 +1,18 @@
-#BLOB
+# BLOB
  is an offline, on-device summarization app designed for users who value privacy, clarity, and speed.
 Powered by Apple’s Foundation Models running locally on the device, BLOB never sends text to external servers — your words stay 100% yours.
 
 The interface uses the new iOS 26 Liquid Glass design system, with floating elements, glassy effects, and a dynamic multicolor animated blob at the center of the experience.
 
-##Features
+## Features
 
-###🔒 Private by Design
+### 🔒 Private by Design
 
 All summaries run entirely on-device using Apple’s on-device LLM.
 
 No network requests, logging, or text transmission.
 
-###✨ Multiple Summary Styles (Tones)
+### ✨ Multiple Summary Styles (Tones)
 
 Choose the tone that fits your context:
 
@@ -26,7 +26,7 @@ Creative – Narrative, smooth, friendly
 
 Bullet Points – Structured, easy to scan
 
-###🪄 Animated Liquid Blob
+### 🪄 Animated Liquid Blob
 
 Dynamic color-shifting orb inspired by iOS 26 motion.
 
@@ -36,7 +36,7 @@ Bounces when a summary is complete.
 
 Glows when processing.
 
-###⌨️ Smart Input Field
+### ⌨️ Smart Input Field
 
 Expands when focused
 
@@ -44,7 +44,7 @@ Hides summaries when typing.
 
 Liquid-glass highlight ring animation.
 
-###🧩 Attachments Menu
+### 🧩 Attachments Menu
 
 Camera Scan (future)
 
@@ -52,7 +52,7 @@ Import from Files (future)
 
 Fully glass-morphed popover like native iOS menus.
 
-###📄 Save & Export Options
+### 📄 Save & Export Options
 
 Copy plain text
 
@@ -62,7 +62,7 @@ Save as Markdown .md
 
 Smooth glass morph transitions from save icon
 
-###🎧 Haptics & Sound Design
+### 🎧 Haptics & Sound Design
 
 Subtle feedback on success
 
@@ -84,7 +84,7 @@ AVFoundation for audio cues
 
 ShareLink / FileExport APIs
 
-##How It Works
+## How It Works
 
 1️⃣ User pastes or types text
 2️⃣ Selects a tone
@@ -95,7 +95,7 @@ ShareLink / FileExport APIs
 — A summary is generated entirely offline
 — The blob animates to indicate completion
 
-##Why This App Exists
+## Why This App Exists
 
 Most summarization tools rely on cloud LLMs, requiring your text to be uploaded, processed, and stored elsewhere.
 BLOB is different.
@@ -114,8 +114,8 @@ Anyone who values privacy and speed
 
 Your data belongs to you, not the servers.
 
-#Roadmap
-###🚀 Coming Soon
+# Roadmap
+### 🚀 Coming Soon
 
 Camera Document Scanner (VisionKit)
 
@@ -129,4 +129,4 @@ Export as PDF
 
 Widget + App Shortcut
 
-###🛠️ Planned Improvements
+### 🛠️ Planned Improvements

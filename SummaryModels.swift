@@ -42,13 +42,12 @@ enum SummaryTone: String, CaseIterable, Identifiable {
         case .creative:
             return """
             Write an engaging, narrative-style summary with a friendly tone and light storytelling,
-            while keeping the main facts accurate. You can use metaphors or imagery.
+            while keeping all important facts accurate.
             """
         case .bulletPoints:
             return """
-            Write the summary as a list of structured bullet points.
-            Group related ideas under clear bullets or sub-bullets.
-            Avoid long paragraphs and focus on structure.
+            Write the summary as a list of structured bullet points, grouped logically.
+            No long paragraphs. Each bullet should contain one key idea.
             """
         }
     }
@@ -81,9 +80,13 @@ enum SaveAction: String, CaseIterable, Identifiable {
 
     var systemImage: String {
         switch self {
-        case .asFile:      return "doc.badge.arrow.down"
-        case .asPlainText: return "doc.on.doc"
-        case .asMarkdown:  return "number"
+        case .asFile:
+            // use a safe symbol that exists everywhere
+            return "square.and.arrow.down"
+        case .asPlainText:
+            return "doc.on.doc"
+        case .asMarkdown:
+            return "number"
         }
     }
 }

@@ -1,79 +1,5 @@
 import SwiftUI
 
-// MARK: - Summary style / tone for the foundation model
-
-enum SummaryTone: String, CaseIterable, Identifiable {
-    case balanced
-    case scientific
-    case concise
-    case creative
-    case bulletPoints
-
-    var id: Self { self }
-
-    var displayName: String {
-        switch self {
-        case .balanced:      return "Balanced"
-        case .scientific:    return "Scientific"
-        case .concise:       return "Concise"
-        case .creative:      return "Creative"
-        case .bulletPoints:  return "Bullet points"
-        }
-    }
-
-    /// Instruction you pass to the FM.
-    var systemInstruction: String {
-        switch self {
-        case .balanced:
-            return "Write a clear, natural summary with a neutral tone. Keep all key points but avoid being too long or too short."
-        case .scientific:
-            return "Write a precise, formal summary using scientific or academic language. Emphasize definitions, data and logical structure."
-        case .concise:
-            return "Write the shortest possible summary that still preserves the core meaning. Avoid extra adjectives and side notes."
-        case .creative:
-            return "Write an engaging, narrative-style summary with a friendly tone and light storytelling, while keeping the main facts."
-        case .bulletPoints:
-            return "Write the summary as a list of structured bullet points, grouped logically, with no long paragraphs."
-        }
-    }
-}
-
-// MARK: - Save actions shown in the menu
-
-enum SaveAction: String, CaseIterable, Identifiable {
-    case asFile
-    case asPlainText
-    case asMarkdown
-
-    var id: Self { self }
-
-    var title: String {
-        switch self {
-        case .asFile:      return "Save as file"
-        case .asPlainText: return "Copy as text"
-        case .asMarkdown:  return "Save as Markdown"
-        }
-    }
-
-    var subtitle: String {
-        switch self {
-        case .asFile:      return "Export a document you can share or store."
-        case .asPlainText: return "Copy the summary to the clipboard."
-        case .asMarkdown:  return "Keep headings, lists and formatting."
-        }
-    }
-
-    var systemImage: String {
-        switch self {
-        case .asFile:      return "doc.badge.arrow.down"
-        case .asPlainText: return "doc.on.doc"
-        case .asMarkdown:  return "number"
-        }
-    }
-}
-
-// MARK: - HOME VIEW
-
 struct HomeView: View {
     @State private var inputText: String = ""
 
@@ -192,8 +118,8 @@ struct HomeView: View {
                         }
                     }
 
-                    // MARK: - Inline summary (if exists)
-                    if let summary = summaryViewModel.summary {
+                    // MARK: - Inline summary (if exists, and NOT editing)
+                    if let summary = summaryViewModel.summary, !isInputFocused {
                         SummaryCardView(
                             summary: summary,
                             tone: selectedTone,
@@ -208,15 +134,16 @@ struct HomeView: View {
                         Spacer(minLength: 40)
                     }
 
-                    // MARK: - BOTTOM INPUT BAR + LIQUID GLASS BUTTONS
-                    bottomBar
-                        .padding(.horizontal, 14)
-                        .padding(.bottom, -10)
+                    Spacer(minLength: 0)
                 }
                 // Smooth insert/remove of the summary card
                 .animation(
                     .spring(response: 0.5, dampingFraction: 0.85),
                     value: summaryViewModel.summary != nil
+                )
+                .animation(
+                    .spring(response: 0.4, dampingFraction: 0.9),
+                    value: isInputFocused
                 )
 
                 // MARK: - Copy toast (center-top, very visible)
@@ -256,6 +183,13 @@ struct HomeView: View {
                 }
             }
 
+            // ⬇️ Bottom bar is now pinned to the bottom / keyboard
+            .safeAreaInset(edge: .bottom) {
+                bottomBar
+                    .padding(.horizontal, 14)
+                    .padding(.bottom, 4)
+            }
+
             // MARK: - TOOLBAR (Liquid Glass layer)
             .toolbar {
 
@@ -264,7 +198,7 @@ struct HomeView: View {
                     Button {
                         toneIconBounce.toggle()
                         showToneSheet = true
-                        Haptics.impact(.light)   // small feedback when opening style picker
+                        Haptics.impact(.light)
                     } label: {
                         Image(systemName: "textformat.alt")
                             .symbolVariant(.fill)
@@ -351,7 +285,6 @@ struct HomeView: View {
                         loadingRotation = 360
                     }
                 } else {
-                    // reset rotation when finished
                     loadingRotation = 0
                 }
             }
@@ -445,7 +378,7 @@ struct HomeView: View {
                 .accessibilityLabel("Add content from camera or files")
                 .accessibilityHint("Attach text using the camera or file picker.")
 
-                // SUMMARIZE – clear hourglass vs sparkles, using loadingRotation
+                // SUMMARIZE – hourglass vs sparkles, with rotation
                 Button {
                     runSummary()
                 } label: {
@@ -501,7 +434,6 @@ struct HomeView: View {
             }
 
             if summaryViewModel.errorMessage != nil {
-                // Haptic: summary failure
                 Haptics.notify(.error)
                 showErrorAlert = true
             }
@@ -511,7 +443,6 @@ struct HomeView: View {
     // MARK: - New session
 
     private func newSession() {
-        // Haptic: medium impact for new session
         Haptics.impact(.medium)
 
         withAnimation {
@@ -523,7 +454,7 @@ struct HomeView: View {
         }
     }
 
-    // MARK: - Save actions (now using SummaryActionsService)
+    // MARK: - Save actions
 
     private func handleSaveAction(_ action: SaveAction) {
         guard let attributed = summaryViewModel.summary else { return }
@@ -533,7 +464,6 @@ struct HomeView: View {
         case .asPlainText:
             actionsService.copyPlainText(text)
 
-            // UI-only: show glass toast
             withAnimation(.easeOut(duration: 0.25)) {
                 copyToastOpacity = 1
             }
@@ -553,7 +483,7 @@ struct HomeView: View {
         }
     }
 
-    // MARK: - Highlight ring like in your preferred version
+    // MARK: - Highlight ring
 
     @ViewBuilder
     private func highlightingBorder(
@@ -620,7 +550,7 @@ struct ToneSelectionSheet: View {
                     ForEach(SummaryTone.allCases) { tone in
                         Button {
                             selectedTone = tone
-                            Haptics.selection()   // haptic when changing style
+                            Haptics.selection()
                         } label: {
                             HStack {
                                 VStack(alignment: .leading, spacing: 4) {

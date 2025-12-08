@@ -5,75 +5,72 @@ struct SummaryDetailView: View {
     let tone: SummaryTone
 
     @Environment(\.dismiss) private var dismiss
-    private let speech = SpeechService.shared
+    @StateObject private var speech = SpeechService()
+    @State private var showSpeechAlert: Bool = false
 
-    @State private var showSpeakConfirm = false
+    private var plainText: String {
+        String(summary.characters)
+    }
 
     var body: some View {
         NavigationStack {
-            ZStack {
-                Color.black.ignoresSafeArea()
+            ScrollView {
+                VStack(alignment: .leading, spacing: 16) {
 
-                ScrollView {
+                    // Tone label
+                    Text(tone.displayName)
+                        .font(.subheadline.weight(.medium))
+                        .foregroundStyle(.secondary)
+
+                    // Actual summary text
                     Text(summary)
                         .frame(maxWidth: .infinity, alignment: .leading)
-                        .padding(20)
-                        .foregroundColor(.primary)
+                        .font(.body)
                 }
-                .background(.ultraThinMaterial)
-                .clipShape(RoundedRectangle(cornerRadius: 26, style: .continuous))
-                .padding(.horizontal, 16)
+                .padding(20)
             }
             .navigationTitle("Summary")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
+
                 // Close
                 ToolbarItem(placement: .topBarLeading) {
-                    Button {
+                    Button("Close") {
+                        speech.stop()
                         dismiss()
-                    } label: {
-                        Image(systemName: "xmark")
                     }
-                    .accessibilityLabel("Close full summary")
                 }
 
-                // Text-to-speech
+                // Text-to-speech button
                 ToolbarItem(placement: .topBarTrailing) {
                     Button {
-                        // security/privacy prompt first
-                        showSpeakConfirm = true
+                        showSpeechAlert = true
                     } label: {
-                        Image(systemName: "speaker.wave.2.fill")
+                        Image(
+                            systemName: speech.isSpeaking
+                            ? "speaker.wave.2.fill"
+                            : "speaker.wave.1"
+                        )
                     }
-                    .tint(colorForTone(tone))
-                    .accessibilityLabel("Read summary out loud")
-                    .accessibilityHint("Plays the summary with device speech, which may expose private information if others can hear.")
+                    .accessibilityLabel(
+                        speech.isSpeaking
+                        ? "Stop reading summary"
+                        : "Read summary aloud"
+                    )
                 }
-            }
-            .alert(
-                "Read this summary out loud?",
-                isPresented: $showSpeakConfirm
-            ) {
-                Button("Cancel", role: .cancel) { }
-
-                Button("Read aloud") {
-                    let text = String(summary.characters)
-                    speech.speak(text)
-                    Haptics.notify(.success)
-                }
-            } message: {
-                Text("This summary may contain sensitive or private information. Make sure you're in a place where it's safe for it to be spoken aloud.")
             }
         }
-    }
-
-    private func colorForTone(_ tone: SummaryTone) -> Color {
-        switch tone {
-        case .balanced:     return .blue
-        case .scientific:   return .red
-        case .concise:      return .cyan
-        case .creative:     return .purple
-        case .bulletPoints: return .green
+        .alert("Read this summary aloud?",
+               isPresented: $showSpeechAlert) {
+            Button("Read aloud") {
+                speech.read(text: plainText)
+            }
+            Button("Cancel", role: .cancel) { }
+        } message: {
+            Text("Audio can be heard by people nearby. Make sure you’re comfortable before playing it out loud.")
+        }
+        .onDisappear {
+            speech.stop()
         }
     }
 }

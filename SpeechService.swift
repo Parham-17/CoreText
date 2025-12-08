@@ -1,34 +1,60 @@
+import Foundation
 import AVFoundation
+import Combine
 
-/// Shared text-to-speech helper for reading summaries aloud.
-final class SpeechService {
+/// Main-actor isolated text-to-speech engine for secure UI usage.
+@MainActor
+final class SpeechService: NSObject, ObservableObject {
 
-    static let shared = SpeechService()
+    @Published private(set) var isSpeaking: Bool = false
 
     private let synthesizer = AVSpeechSynthesizer()
 
-    private init() {}
-
-    var isSpeaking: Bool {
-        synthesizer.isSpeaking
+    override init() {
+        super.init()
+        synthesizer.delegate = self
     }
 
-    func speak(_ text: String) {
-        // Stop any ongoing speech immediately
+    // MARK: - Start reading text
+
+    func read(_ text: String) {
+        let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else { return }
+
         if synthesizer.isSpeaking {
             synthesizer.stopSpeaking(at: .immediate)
         }
 
-        let utterance = AVSpeechUtterance(string: text)
-        utterance.voice = AVSpeechSynthesisVoice(language: Locale.current.identifier)
-        utterance.rate = AVSpeechUtteranceDefaultSpeechRate
+        let utterance = AVSpeechUtterance(string: trimmed)
+        utterance.voice = AVSpeechSynthesisVoice(language: "en-US")
+        utterance.rate = AVSpeechUtteranceDefaultSpeechRate * 0.95
         utterance.pitchMultiplier = 1.0
-        utterance.prefersAssistiveTechnologySettings = true   // respect accessibility
+        utterance.prefersAssistiveTechnologySettings = true
 
         synthesizer.speak(utterance)
+        isSpeaking = true
     }
 
+    // MARK: - Stop reading
+
     func stop() {
+        guard synthesizer.isSpeaking else { return }
         synthesizer.stopSpeaking(at: .immediate)
+        isSpeaking = false
+    }
+}
+
+// MARK: - AVSpeechSynthesizerDelegate
+
+extension SpeechService: AVSpeechSynthesizerDelegate {
+
+    func speechSynthesizer(_ synthesizer: AVSpeechSynthesizer,
+                           didFinish utterance: AVSpeechUtterance) {
+        isSpeaking = false
+    }
+
+    func speechSynthesizer(_ synthesizer: AVSpeechSynthesizer,
+                           didCancel utterance: AVSpeechUtterance) {
+        isSpeaking = false
     }
 }

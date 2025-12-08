@@ -8,97 +8,120 @@ struct SummaryCardView: View {
     let onNewSession: () -> Void
     let onExpand: () -> Void
 
-    private var tint: Color {
-        switch tone {
-        case .balanced:     return .blue
-        case .scientific:   return .red
-        case .concise:      return .cyan
-        case .creative:     return .purple
-        case .bulletPoints: return .green
-        }
+    // MARK: - Word counts
+
+    private var originalWordCount: Int {
+        originalText
+            .split { $0.isWhitespace || $0.isNewline }
+            .count
     }
 
-    private var plainSummaryPrefix: String {
-        let s = String(summary.characters)
-        let trimmed = s.replacingOccurrences(of: "\n", with: " ")
-        return String(trimmed.prefix(120))
+    private var summaryWordCount: Int {
+        String(summary.characters)
+            .split { $0.isWhitespace || $0.isNewline }
+            .count
     }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            HStack {
-                Text("Summary")
-                    .font(.headline)
-                    .foregroundColor(.primary)
-
-                Spacer()
-
-                // Expand button
-                Button {
-                    onExpand()
-                    Haptics.impact(.light)
-                } label: {
-                    HStack(spacing: 6) {
-                        Image(systemName: "arrow.up.left.and.arrow.down.right")
-                        Text("Expand")
-                    }
-                    .font(.subheadline.weight(.medium))
-                    .padding(.horizontal, 12)
-                    .padding(.vertical, 6)
-                    .background(.ultraThinMaterial, in: Capsule())
-                    .overlay(
-                        Capsule()
-                            .stroke(Color.white.opacity(0.25), lineWidth: 0.7)
-                    )
-                }
-                .accessibilityLabel("Show summary full screen")
-                .accessibilityHint("Opens the summary in a larger view with extra options like text to speech.")
-            }
-
-            Text(summary)
-                .lineLimit(6)
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .foregroundColor(.primary)
-                .accessibilityLabel("Summary: \(plainSummaryPrefix)")
-
-            HStack {
-                // Tone info
-                Label(tone.displayName, systemImage: "slider.horizontal.3")
-                    .font(.footnote)
-                    .foregroundStyle(.secondary)
-
-                Spacer()
-
-                // New session / clear
-                Button {
-                    onNewSession()
-                } label: {
-                    HStack(spacing: 6) {
-                        Image(systemName: "arrow.counterclockwise")
-                        Text("New session")
-                    }
-                    .font(.footnote.weight(.semibold))
-                    .padding(.horizontal, 12)
-                    .padding(.vertical, 6)
-                    .background(.ultraThinMaterial, in: Capsule())
-                    .overlay(
-                        Capsule()
-                            .stroke(Color.white.opacity(0.25), lineWidth: 0.7)
-                    )
-                }
-                .accessibilityLabel("New session")
-                .accessibilityHint("Clears the summary and input so you can start over with new text.")
-            }
-        }
-        .padding(16)
-        .background(.ultraThinMaterial)
-        .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
-        .overlay(
+        ZStack {
+            // MARK: Glass background (no big white sheet anymore)
             RoundedRectangle(cornerRadius: 24, style: .continuous)
-                .stroke(Color.white.opacity(0.18), lineWidth: 1)
-        )
+                .fill(.ultraThinMaterial) // native glass
+                .overlay(
+                    RoundedRectangle(cornerRadius: 24, style: .continuous)
+                        .stroke(Color.white.opacity(0.08), lineWidth: 1) // subtle edge
+                )
+
+            // MARK: Content inside the glass
+            VStack(alignment: .leading, spacing: 10) {
+
+                // Header: title + Expand
+                HStack {
+                    Text("Summary")
+                        .font(.headline.weight(.semibold))
+
+                    Spacer()
+
+                    Button(action: onExpand) {
+                        HStack(spacing: 6) {
+                            Image(systemName: "arrow.up.left.and.arrow.down.right")
+                            Text("Expand")
+                        }
+                        .font(.callout.weight(.semibold))
+                        .padding(.horizontal, 14)
+                        .padding(.vertical, 6)
+                        .background(.ultraThinMaterial, in: Capsule())
+                        .overlay(
+                            Capsule()
+                                .stroke(Color.white.opacity(0.25), lineWidth: 0.8)
+                        )
+                    }
+                    .tint(.blue)
+                    .accessibilityLabel("Expand summary")
+                    .accessibilityHint("Show the summary full screen with extra options.")
+                }
+
+                // Word counts
+                if !originalText.isEmpty {
+                    HStack {
+                        Spacer()
+                        Text("\(originalWordCount) → \(summaryWordCount) words")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+                }
+
+                // Scrollable summary text
+                ScrollView {
+                    Text(summary)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .padding(.top, 4)
+                        .padding(.bottom, 6)
+                        .foregroundStyle(.primary)
+                }
+                .scrollIndicators(.visible)
+
+                // Footer: tone caption + New session
+                HStack {
+                    // 👉 Tone as caption (not a button / chip)
+                    HStack(spacing: 6) {
+                        Image(systemName: "slider.horizontal.3")
+                            .font(.caption2)
+                            .foregroundStyle(.secondary)
+
+                        Text(tone.displayName)
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+                    .accessibilityElement(children: .combine)
+                    .accessibilityLabel("Tone: \(tone.displayName)")
+
+                    Spacer()
+
+                    Button(action: onNewSession) {
+                        HStack(spacing: 6) {
+                            Image(systemName: "arrow.counterclockwise")
+                            Text("New session")
+                        }
+                        .font(.subheadline.weight(.semibold))
+                        .padding(.horizontal, 14)
+                        .padding(.vertical, 6)
+                        .background(.ultraThinMaterial, in: Capsule())
+                        .overlay(
+                            Capsule()
+                                .stroke(Color.white.opacity(0.25), lineWidth: 0.8)
+                        )
+                    }
+                    .tint(.blue)
+                    .accessibilityLabel("New session")
+                    .accessibilityHint("Clear the current summary and start again.")
+                }
+            }
+            .padding(16)
+        }
+        // Same overall size / position as before
+        .frame(minHeight: 300, maxHeight: 400)
         .padding(.horizontal, 16)
-        .accessibilityElement(children: .contain)
-        .accessibilityHint("Contains your latest summary, with options to expand or start a new session.")
+        .padding(.bottom, 30)
     }
 }

@@ -1,4 +1,4 @@
-# BLOB
+# CoreText
  is an offline, on-device summarization app designed for users who value privacy, clarity, and speed.
 Powered by Apple’s Foundation Models running locally on the device, BLOB never sends text to external servers — your words stay 100% yours.
 
@@ -68,7 +68,7 @@ Subtle feedback on success
 
 Optional completion sound effect
 
-Tech Stack
+### So Basically:
 
 SwiftUI (iOS 26)
 
@@ -84,7 +84,7 @@ AVFoundation for audio cues
 
 ShareLink / FileExport APIs
 
-## How It Works
+# How It Works
 
 1️⃣ User pastes or types text
 2️⃣ Selects a tone
@@ -95,38 +95,50 @@ ShareLink / FileExport APIs
 — A summary is generated entirely offline
 — The blob animates to indicate completion
 
-## Why This App Exists
+# Why This App Exists
 
 Most summarization tools rely on cloud LLMs, requiring your text to be uploaded, processed, and stored elsewhere.
-BLOB is different.
+CoreText is different.
+Additionally, based on the user's needs and context, the summarization style can vary. IN one word: Customization!
 
-It is built for:
+### It is built for:
 
-Students handling sensitive notes
+- Students handling sensitive notes
 
-Professionals with confidential documents
+- Professionals with confidential documents
 
-Researchers dealing with scientific papers
+- Researchers dealing with scientific papers
 
-Journalists working offline
+- Journalists working offline
 
-Anyone who values privacy and speed
+- Anyone who values privacy and speed
 
-Your data belongs to you, not the servers.
+Your data belongs to you, not the servers!
 
 # Roadmap
-### 🚀 Coming Soon
+
+## 🚀 Coming Soon
 
 Camera Document Scanner (VisionKit)
 
 OCR-to-summary pipeline
 
-Full revision history
+More AI assistance features on the expanded summary view
 
-Custom tones
+More custom tones
 
 Export as PDF
 
 Widget + App Shortcut
 
-### 🛠️ Planned Improvements
+Multiple Languages
+
+And many more!
+
+## 🛠️ Planned Improvements
+
+Better UI and UX
+
+Faster and more accurate results
+
+More accessibility features

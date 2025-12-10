@@ -1,8 +1,8 @@
 # CoreText
  is an offline, on-device summarization app designed for users who value privacy, clarity, and speed.
-Powered by Apple’s Foundation Models running locally on the device, BLOB never sends text to external servers — your words stay 100% yours.
+Powered by Apple’s Foundation Models running locally on the device, CoreText never sends text to external servers — your text stays 100% yours.
 
-The interface uses the new iOS 26 Liquid Glass design system, with floating elements, glassy effects, and a dynamic multicolor animated blob at the center of the experience.
+The interface uses the new iOS 26 Liquid Glass design system, with floating elements and a dynamic multicolor animated blob at the center of the experience.
 
 ## Features
 

@@ -23,6 +23,9 @@ struct HomeView: View {
     // Namespace for glass effect IDs (top toolbar button + bottom menu)
     @Namespace private var glassNamespace
 
+    // 👉 Namespace for zoom transition (summary card → full screen)
+    @Namespace private var summaryZoomNamespace
+
     // focus for the bottom bar text field
     @FocusState private var isInputFocused: Bool
 
@@ -129,8 +132,14 @@ struct HomeView: View {
                             originalText: inputText,
                             onNewSession: newSession,
                             onExpand: {
+                                // 🔍 Instead of sheet: trigger navigation with zoom
                                 isShowingFullSummary = true
                             }
+                        )
+                        // 🪄 Source of zoom transition
+                        .matchedTransitionSource(
+                            id: "summaryZoom",
+                            in: summaryZoomNamespace
                         )
                         .transition(.move(edge: .bottom).combined(with: .opacity))
                     } else {
@@ -252,10 +261,24 @@ struct HomeView: View {
                     .presentationDragIndicator(.visible)
             }
 
-            // MARK: - Full-screen summary
-            .sheet(isPresented: $isShowingFullSummary) {
+            // ❌ OLD: Full-screen summary via sheet (removed)
+            // .sheet(isPresented: $isShowingFullSummary) { ... }
+
+            // ✅ NEW: Full-screen summary via NavigationStack + zoom transition
+            .navigationDestination(isPresented: $isShowingFullSummary) {
                 if let summary = summaryViewModel.summary {
                     SummaryDetailView(summary: summary, tone: selectedTone)
+                        .navigationTransition(
+                            .zoom(
+                                sourceID: "summaryZoom",
+                                in: summaryZoomNamespace
+                            )
+                        )
+                } else {
+                    // Fallback (should rarely happen)
+                    Text("No summary available.")
+                        .font(.headline)
+                        .foregroundStyle(.secondary)
                 }
             }
 
@@ -364,7 +387,6 @@ struct HomeView: View {
                     Image(systemName: "paperclip")
                         .font(.system(size: 18, weight: .semibold))
                         .frame(width: 35, height: 35)            // ⬅️ MATCH summarize button
-//                        .glassEffect()
                         .glassEffectID("attachmentGlass", in: glassNamespace)
                 }
                 .buttonStyle(.glassProminent)       // ⬅️ SAME STYLE
